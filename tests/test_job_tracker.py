@@ -34,6 +34,16 @@ def test_duration_increases_while_running():
     assert job.duration >= 0.05
 
 
+def test_duration_is_fixed_after_finish():
+    """Once a job finishes, its duration should not keep growing."""
+    tracker = JobTracker()
+    tracker.start("quick_job")
+    job = tracker.finish("quick_job")
+    duration_at_finish = job.duration
+    time.sleep(0.05)
+    assert job.duration == duration_at_finish
+
+
 def test_overdue_detection():
     tracker = JobTracker()
     tracker.start("quick", expected_duration=0.01)
