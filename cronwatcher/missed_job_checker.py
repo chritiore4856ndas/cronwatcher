@@ -63,3 +63,11 @@ class MissedJobChecker:
         self._alerted = {
             k for k in self._alerted if not k.startswith(f"{job_name}:")
         }
+
+    def alerted_jobs(self) -> set[str]:
+        """Return the set of job names that currently have active alerts.
+
+        Useful for inspecting checker state in tests or admin tooling without
+        exposing the raw internal alert-key format.
+        """
+        return {key.split(":", 1)[0] for key in self._alerted}
