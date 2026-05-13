@@ -59,12 +59,31 @@ class TagRegistry:
         """Return sorted list of every known tag."""
         return sorted(self._tag_to_jobs.keys())
 
+    def all_jobs(self) -> List[str]:
+        """Return sorted list of every registered job name."""
+        return sorted(self._job_to_tags.keys())
+
     def remove_job(self, job_name: str) -> None:
         """Remove *job_name* and all its tag associations."""
         for tag in list(self._job_to_tags.pop(job_name, set())):
             self._tag_to_jobs[tag].discard(job_name)
             if not self._tag_to_jobs[tag]:
                 del self._tag_to_jobs[tag]
+
+    def rename_tag(self, old_tag: str, new_tag: str) -> None:
+        """Rename *old_tag* to *new_tag* across all job associations.
+
+        If *old_tag* does not exist this is a no-op.  If *new_tag* already
+        exists the job sets are merged.
+        """
+        old_tag = old_tag.strip().lower()
+        new_tag = new_tag.strip().lower()
+        if not old_tag or not new_tag or old_tag not in self._tag_to_jobs:
+            return
+        for job_name in self._tag_to_jobs.pop(old_tag):
+            self._tag_to_jobs[new_tag].add(job_name)
+            self._job_to_tags[job_name].discard(old_tag)
+            self._job_to_tags[job_name].add(new_tag)
 
     def to_dict(self) -> Dict[str, List[str]]:
         """Serialise as ``{job_name: [tag, ...]}`` mapping."""
